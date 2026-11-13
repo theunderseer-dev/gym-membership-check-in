@@ -1,0 +1,28 @@
+# Gradle and Kotlin
+.gradle/
+.kotlin/
+build/
+local.properties
+
+# Android Studio
+.idea/
+*.iml
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Build outputs and profiling
+*.apk
+*.aab
+output-metadata.json
+*.hprof
+*.log
+
+# Local signing
+*.jks
+*.keystore
+keystore.properties
+signing.properties
+
+# macOS
+.DS_Store
