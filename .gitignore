@@ -24,5 +24,17 @@ output-metadata.json
 keystore.properties
 signing.properties
 
+# Xcode
+*.xcuserstate
+project.xcworkspace/xcuserdata/
+*.xcuserdatad/
+xcuserdata/
+DerivedData/
+.build/
+
+# Project-local planning docs (not for public repo)
+*-plan.md
+*-mvp-plan.md
+
 # macOS
 .DS_Store

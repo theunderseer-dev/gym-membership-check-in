@@ -1,48 +1,78 @@
 # Gym Membership Check-In
 
-A native Android prototype for gym reception staff to register members
-and check membership status using a digital QR card.
+A lightweight, native prototype for gym reception staff to **register clients** and **verify membership status** using a digital QR pass — no server or internet connection required.
 
-## Status
+> Built to demonstrate that a fully functional membership workflow can run on a single mobile device in a matter of hours. Useful as a foundation for a production check-in system or as a reference for rapid MVP development.
+>
+> The entire prototype — Android app, iOS app, unit tests, documentation, and architecture decisions — was built using [Antigravity](https://antigravity.google) by Google DeepMind.
 
-The MVP runs on a single Android device and stores member records locally.
-Registration, manual ID lookup, and QR scanning from a saved image were
-verified in the Android Emulator. Live camera scanning needs a real
-device test.
+---
 
-## How it works
+## What it does
 
-1. Select **Register member** and enter the member's name. The app creates
-   a one-calendar-month membership starting on the registration date.
-2. The app generates a unique member ID and a QR card. Share the QR image
-   so the member can save it and show it at reception.
-3. Open **Check membership** and scan the QR with the camera, select a
-   saved QR image, or enter the member ID manually. The app displays the
-   member's name, expiration date, and membership status.
+| Step | Staff action | What happens |
+|------|-------------|--------------|
+| 1 | Tap **Register member**, type the client's name | App creates a 1-calendar-month membership and generates a unique ID |
+| 2 | Tap **Share QR** | A QR image is shared — the client saves it to their phone |
+| 3 | Tap **Check membership**, scan / upload QR or type the ID | App shows **Active** or **Expired** with the expiry date |
 
-The membership stays active through its expiration date, inclusive.
-For example, a membership created on February 2 is active through March 2.
+Membership is active **through** the expiry date (inclusive). A pass issued on 2 Feb expires at end of day 2 Mar.
 
-## Project structure
+---
 
-- `app/` — Android app, including registration, QR handling, membership
-  lookup, and local storage.
-- `gradle/wrapper/` — Gradle Wrapper files.
+## Platforms
 
-## Local development
+| | Android | iOS |
+|--|---------|-----|
+| Language | Kotlin | Swift |
+| UI | Jetpack Compose | SwiftUI |
+| Storage | Room (SQLite) | JSON file (FileManager) |
+| Camera scanning | CameraX + ZXing | AVFoundation + Vision |
+| QR generation | ZXing | CoreImage (CIFilter) |
+| Min version | API 26 (Android 8) | iOS 16 |
 
-Open the project root in Android Studio and sync Gradle. Select JDK 17 or JDK 21
-as the Gradle JDK and use the Gradle Wrapper included in the repository.
+Both apps share the same QR format and membership rules, so an Android-registered QR can be verified on an iOS device and vice versa.
+
+---
+
+## Quick start
+
+### Android
 
 ```bash
+# Build debug APK
 ./gradlew assembleDebug
+
+# Install on connected device / emulator
+adb install app/build/outputs/apk/debug/app-debug.apk
 ```
 
-To try the MVP on an emulator, run the `app` configuration, register a
-test member, and save a screenshot of their QR code. If the screenshot
-was saved on your computer, copy it to the emulator's Downloads folder.
-Then open **Check membership → Scan QR from image**, select the screenshot,
-and check that the member appears with the **Active** status.
+Requires Android Studio with JDK 17 or 21.
+
+### iOS
+
+```bash
+# Build for iOS Simulator
+xcodebuild -project ios/GymCheckIn.xcodeproj \
+  -scheme GymCheckIn \
+  -sdk iphonesimulator \
+  -configuration Debug \
+  build CODE_SIGNING_ALLOWED=NO
+```
+
+For a physical iPhone, open `ios/GymCheckIn.xcodeproj` in Xcode, set your team under **Signing & Capabilities**, and press ⌘R.
+
+---
+
+## Docs
+
+- **[Architecture & design](docs/architecture.md)** — layers, data model, QR format, edge cases, platform comparison.
+- **ADRs** — key decisions with context and rationale:
+  - [ADR-001 Local-only storage](docs/adr/001-local-only-storage.md)
+  - [ADR-002 QR payload format](docs/adr/002-qr-payload-format.md)
+  - [ADR-003 Separate native apps per platform](docs/adr/003-native-per-platform.md)
+
+---
 
 ## Author
 
