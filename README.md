@@ -12,9 +12,9 @@ A lightweight, native prototype for gym reception staff to **register clients** 
 
 | Step | Staff action | What happens |
 |------|-------------|--------------|
-| 1 | Tap **Register member**, type the client's name | App creates a 1-calendar-month membership and generates a unique ID |
+| 1 | Tap **Register member**, enter client name & take photo | App creates a 1-calendar-month pass, links member photo, and generates a unique ID |
 | 2 | Tap **Share QR** | A QR image is shared — the client saves it to their phone |
-| 3 | Tap **Check membership**, scan / upload QR or type the ID | App shows **Active** or **Expired** with the expiry date |
+| 3 | Tap **Check membership**, scan / upload QR or enter ID | App shows **Active** / **Expired** status, expiry date, and the **member's photo** to verify identity |
 
 Membership is active **through** the expiry date (inclusive). A pass issued on 2 Feb expires at end of day 2 Mar.
 

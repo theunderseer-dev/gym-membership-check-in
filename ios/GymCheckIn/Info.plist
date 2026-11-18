@@ -21,9 +21,9 @@
     <key>LSRequiresIPhoneOS</key>
     <true/>
     <key>NSCameraUsageDescription</key>
-    <string>Gym Check-in needs camera access to scan member QR cards.</string>
+    <string>Gym Check-in needs camera access to capture member identity photos and scan QR passes.</string>
     <key>NSPhotoLibraryUsageDescription</key>
-    <string>Gym Check-in needs photo library access to scan member QR cards from saved images.</string>
+    <string>Gym Check-in needs photo library access to choose member photos and scan QR passes from saved images.</string>
     <key>UILaunchScreen</key>
     <dict/>
     <key>UISupportedInterfaceOrientations</key>

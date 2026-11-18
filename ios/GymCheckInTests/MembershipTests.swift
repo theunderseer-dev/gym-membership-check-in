@@ -113,4 +113,36 @@ final class MembershipTests: XCTestCase {
         let decodeResult = QRCodeHelper.decodeQRCode(from: qrImage)
         XCTAssertEqual(decodeResult, .success(testId))
     }
+
+    func testMemberPhotoPersistenceAndRetrieval() throws {
+        let tempDir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: tempDir) }
+
+        let repo = GymRepository(
+            fileURL: tempDir.appendingPathComponent("test_members.json"),
+            photosDirectory: tempDir.appendingPathComponent("photos")
+        )
+
+        // Create a simple test image
+        let size = CGSize(width: 100, height: 100)
+        let renderer = UIGraphicsImageRenderer(size: size)
+        let testImage = renderer.image { ctx in
+            ctx.cgContext.setFillColor(UIColor.blue.cgColor)
+            ctx.cgContext.fill(CGRect(origin: .zero, size: size))
+        }
+
+        // Register member with photo
+        let member = try repo.registerMember(name: "Photo Member", photo: testImage)
+        XCTAssertNotNil(member.photoFileName)
+
+        // Retrieve photo
+        let retrieved = repo.getPhoto(for: member)
+        XCTAssertNotNil(retrieved)
+
+        // Register member without photo
+        let memberNoPhoto = try repo.registerMember(name: "No Photo Member", photo: nil)
+        XCTAssertNil(memberNoPhoto.photoFileName)
+        XCTAssertNil(repo.getPhoto(for: memberNoPhoto))
+    }
 }

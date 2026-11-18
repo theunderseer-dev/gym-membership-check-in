@@ -282,6 +282,44 @@ struct CheckMembershipView: View {
                     }
                     .padding(.top, 16)
 
+                    // Member Identity Photo
+                    if let photo = repository.getPhoto(for: member) {
+                        VStack(spacing: 8) {
+                            Image(uiImage: photo)
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 140, height: 140)
+                                .clipShape(RoundedRectangle(cornerRadius: 18))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 18)
+                                        .stroke(statusColor, lineWidth: 3)
+                                )
+                                .shadow(color: .black.opacity(0.12), radius: 8, x: 0, y: 4)
+
+                            HStack(spacing: 4) {
+                                Image(systemName: "person.crop.rectangle.badge.checkmark")
+                                    .foregroundStyle(statusColor)
+                                Text("Registered Member Photo")
+                                    .font(.caption.bold())
+                                    .foregroundStyle(.secondary)
+                            }
+
+                            Text("Verify person matches photo on record")
+                                .font(.caption2)
+                                .foregroundStyle(.tertiary)
+                        }
+                    } else {
+                        VStack(spacing: 6) {
+                            Image(systemName: "person.crop.circle.fill")
+                                .font(.system(size: 72))
+                                .foregroundStyle(.secondary.opacity(0.5))
+
+                            Text("No photo on record")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+
                     VStack(alignment: .leading, spacing: 16) {
                         VStack(alignment: .leading, spacing: 4) {
                             Text("Client Name:")

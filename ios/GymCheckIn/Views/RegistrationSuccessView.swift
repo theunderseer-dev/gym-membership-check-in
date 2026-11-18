@@ -2,6 +2,7 @@ import SwiftUI
 
 struct RegistrationSuccessView: View {
     let member: Member
+    var repository: GymRepository? = nil
     var onDoneToRoot: (() -> Void)? = nil
 
     @Environment(\.dismiss) private var dismiss
@@ -30,12 +31,26 @@ struct RegistrationSuccessView: View {
                 .padding(.top, 8)
 
                 VStack(alignment: .leading, spacing: 14) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Name:")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                        Text(member.name)
-                            .font(.headline)
+                    HStack(spacing: 16) {
+                        if let photo = (repository ?? GymRepository.shared).getPhoto(for: member) {
+                            Image(uiImage: photo)
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 64, height: 64)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(Color.green.opacity(0.6), lineWidth: 2)
+                                )
+                        }
+
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Name:")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            Text(member.name)
+                                .font(.title3.bold())
+                        }
                     }
 
                     Divider()

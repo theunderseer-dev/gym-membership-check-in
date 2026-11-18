@@ -127,6 +127,7 @@ struct HomeView: View {
                 case .registrationSuccess(let member):
                     RegistrationSuccessView(
                         member: member,
+                        repository: repository,
                         onDoneToRoot: {
                             navigationPath = NavigationPath()
                         }

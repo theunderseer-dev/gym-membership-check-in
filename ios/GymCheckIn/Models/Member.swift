@@ -11,13 +11,15 @@ struct Member: Identifiable, Codable, Equatable, Hashable {
     let startsOn: Date
     let endsOnInclusive: Date
     let createdAt: Date
+    var photoFileName: String?
 
     init(
         id: String = UUID().uuidString,
         name: String,
         startsOn: Date = Date(),
         endsOnInclusive: Date? = nil,
-        createdAt: Date = Date()
+        createdAt: Date = Date(),
+        photoFileName: String? = nil
     ) {
         self.id = id
         self.name = name
@@ -29,6 +31,7 @@ struct Member: Identifiable, Codable, Equatable, Hashable {
             self.endsOnInclusive = calendar.date(byAdding: .month, value: 1, to: startsOn) ?? startsOn
         }
         self.createdAt = createdAt
+        self.photoFileName = photoFileName
     }
 
     func status(asOf date: Date = Date()) -> MembershipStatus {
