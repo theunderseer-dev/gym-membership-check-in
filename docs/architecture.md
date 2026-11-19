@@ -82,16 +82,16 @@ Home screen
     ├─► Register member
     │       │
     │       ├─ Enter name
-    │       ├─ Take Member Photo ──► Camera opens (AVFoundation)
-    │       │                           │
-    │       │                           ▼
-    │       │                       Snap photo
-    │       │                           │
-    │       │                           ├─► Retake Photo ──► Back to live camera
-    │       │                           └─► Continue / Done
-    │       │                                   │
-    │       ▼                                   ▼
-    │   Registration success ◄──────────────────┘
+    │       ├─ Tap "Take Photo & Register" ──► Camera opens (AVFoundation)
+    │       │                                      │
+    │       │                                      ▼
+    │       │                                  Snap photo
+    │       │                                      │
+    │       │                                      ├─► Retake Photo ──► Back to live camera
+    │       │                                      └─► Continue / Done
+    │       │                                              │
+    │       ▼ (or "Register without Photo")                ▼
+    │   Registration success ◄─────────────────────────────┘
     │       • Unique ID generated (UUID)
     │       • endsOnInclusive = today + 1 month
     │       • Photo saved to local photos directory (<id>.jpg)
@@ -122,7 +122,7 @@ Home screen
 | Situation | Expected behaviour |
 |-----------|-------------------|
 | Name field empty or whitespace-only | Validation error; registration blocked |
-| Tap "Take Member Photo" with empty name | Inline prompt asking for client name first |
+| Tap "Take Photo & Register" with empty name | Validation error: "Client name cannot be empty" |
 | Photo captured, user taps "Retake Photo" | Photo discarded, live camera restarts immediately |
 | Photo captured, user taps "Continue" | Photo confirmed, member registered, QR screen presented |
 | Client refuses photo / camera broken | "Register without Photo" allows registration with placeholder |
