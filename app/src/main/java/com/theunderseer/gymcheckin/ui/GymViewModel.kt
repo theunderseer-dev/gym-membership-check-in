@@ -3,14 +3,14 @@ package com.theunderseer.gymcheckin.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.theunderseer.gymcheckin.data.GymRepository
-import com.theunderseer.gymcheckin.model.Member
-import com.theunderseer.gymcheckin.model.MembershipStatus
+import com.theunderseer.gymcheckin.domain.model.Member
+import com.theunderseer.gymcheckin.domain.model.MembershipStatus
+import com.theunderseer.gymcheckin.domain.repository.GymRepository
+import com.theunderseer.gymcheckin.domain.util.currentDate
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.time.LocalDate
 
 sealed interface CheckResult {
     data class Found(val member: Member, val status: MembershipStatus) : CheckResult
@@ -82,7 +82,7 @@ class GymViewModel(
             _uiState.value = _uiState.value.copy(isChecking = true, checkInputId = targetId)
             val member = repository.getMemberById(targetId)
             if (member != null) {
-                val status = member.status(LocalDate.now())
+                val status = member.status(currentDate())
                 _uiState.value = _uiState.value.copy(
                     isChecking = false,
                     checkResult = CheckResult.Found(member, status)

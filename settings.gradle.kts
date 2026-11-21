@@ -16,3 +16,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "GymCheckInMvp"
 include(":app")
+include(":shared")

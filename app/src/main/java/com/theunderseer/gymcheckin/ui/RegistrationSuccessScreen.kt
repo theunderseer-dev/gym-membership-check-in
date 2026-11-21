@@ -45,7 +45,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.theunderseer.gymcheckin.model.Member
+import com.theunderseer.gymcheckin.domain.model.Member
 import com.theunderseer.gymcheckin.qr.QrCodeUtils
 
 @OptIn(ExperimentalMaterial3Api::class)

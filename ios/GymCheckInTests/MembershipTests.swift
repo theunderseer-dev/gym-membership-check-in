@@ -1,4 +1,5 @@
 import XCTest
+import SharedDomain
 @testable import GymCheckIn
 
 final class MembershipTests: XCTestCase {
@@ -144,5 +145,28 @@ final class MembershipTests: XCTestCase {
         let memberNoPhoto = try repo.registerMember(name: "No Photo Member", photo: nil)
         XCTAssertNil(memberNoPhoto.photoFileName)
         XCTAssertNil(repo.getPhoto(for: memberNoPhoto))
+    }
+
+    func testSharedDomain_validationAndCalculation() throws {
+        let validName = try MemberValidation.shared.validateName(name: "  Sarah Connor  ")
+        XCTAssertEqual(validName, "Sarah Connor")
+
+        XCTAssertThrowsError(try MemberValidation.shared.validateName(name: "   "))
+
+        let startLocalDate = SharedDomain.LocalDate(year: 2026, monthNumber: 1, dayOfMonth: 31)
+        let plusMonth = DateUtilsKt.currentDatePlusMonths(date: startLocalDate, months: 1)
+        XCTAssertEqual(plusMonth.year, 2026)
+        XCTAssertEqual(plusMonth.monthNumber, 2)
+        XCTAssertEqual(plusMonth.dayOfMonth, 28)
+
+        let member = SharedDomain.Member(
+            id: "shared-test-id",
+            name: "Shared Member",
+            startsOn: SharedDomain.LocalDate(year: 2026, monthNumber: 2, dayOfMonth: 2),
+            endsOnInclusive: SharedDomain.LocalDate(year: 2026, monthNumber: 3, dayOfMonth: 2),
+            photoFileName: nil
+        )
+        XCTAssertEqual(member.status(today: SharedDomain.LocalDate(year: 2026, monthNumber: 3, dayOfMonth: 2)), .active)
+        XCTAssertEqual(member.status(today: SharedDomain.LocalDate(year: 2026, monthNumber: 3, dayOfMonth: 3)), .expired)
     }
 }
