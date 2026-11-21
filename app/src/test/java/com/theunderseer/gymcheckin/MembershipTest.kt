@@ -9,44 +9,45 @@ import com.google.zxing.common.HybridBinarizer
 import com.google.zxing.qrcode.QRCodeReader
 import com.google.zxing.qrcode.QRCodeWriter
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
-import com.theunderseer.gymcheckin.model.Member
-import com.theunderseer.gymcheckin.model.MembershipStatus
+import com.theunderseer.gymcheckin.domain.model.Member
+import com.theunderseer.gymcheckin.domain.model.MembershipStatus
+import com.theunderseer.gymcheckin.domain.util.currentDatePlusMonths
 import com.theunderseer.gymcheckin.qr.QrCodeUtils
+import kotlinx.datetime.LocalDate
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Test
-import java.time.LocalDate
 
 class MembershipTest {
 
     @Test
     fun testDateCalculation_standardDate() {
         // 2 February -> 2 March
-        val startsOn = LocalDate.of(2026, 2, 2)
-        val endsOn = startsOn.plusMonths(1)
-        assertEquals(LocalDate.of(2026, 3, 2), endsOn)
+        val startsOn = LocalDate(2026, 2, 2)
+        val endsOn = currentDatePlusMonths(startsOn, 1)
+        assertEquals(LocalDate(2026, 3, 2), endsOn)
     }
 
     @Test
     fun testDateCalculation_endOfMonth_nonLeapYear() {
         // 31 January -> 28 February (2026 is non-leap)
-        val startsOn = LocalDate.of(2026, 1, 31)
-        val endsOn = startsOn.plusMonths(1)
-        assertEquals(LocalDate.of(2026, 2, 28), endsOn)
+        val startsOn = LocalDate(2026, 1, 31)
+        val endsOn = currentDatePlusMonths(startsOn, 1)
+        assertEquals(LocalDate(2026, 2, 28), endsOn)
     }
 
     @Test
     fun testDateCalculation_endOfMonth_leapYear() {
         // 31 January -> 29 February (2024 is leap)
-        val startsOn = LocalDate.of(2024, 1, 31)
-        val endsOn = startsOn.plusMonths(1)
-        assertEquals(LocalDate.of(2024, 2, 29), endsOn)
+        val startsOn = LocalDate(2024, 1, 31)
+        val endsOn = currentDatePlusMonths(startsOn, 1)
+        assertEquals(LocalDate(2024, 2, 29), endsOn)
     }
 
     @Test
     fun testMembershipStatus_inclusiveExpiration() {
-        val startsOn = LocalDate.of(2026, 2, 2)
-        val endsOnInclusive = LocalDate.of(2026, 3, 2)
+        val startsOn = LocalDate(2026, 2, 2)
+        val endsOnInclusive = LocalDate(2026, 3, 2)
         val member = Member(
             id = "test-id",
             name = "Test Member",
@@ -55,13 +56,13 @@ class MembershipTest {
         )
 
         // Day before expiration
-        assertEquals(MembershipStatus.ACTIVE, member.status(LocalDate.of(2026, 3, 1)))
+        assertEquals(MembershipStatus.ACTIVE, member.status(LocalDate(2026, 3, 1)))
 
         // Exact day of expiration (inclusive) -> ACTIVE
-        assertEquals(MembershipStatus.ACTIVE, member.status(LocalDate.of(2026, 3, 2)))
+        assertEquals(MembershipStatus.ACTIVE, member.status(LocalDate(2026, 3, 2)))
 
         // Day after expiration -> EXPIRED
-        assertEquals(MembershipStatus.EXPIRED, member.status(LocalDate.of(2026, 3, 3)))
+        assertEquals(MembershipStatus.EXPIRED, member.status(LocalDate(2026, 3, 3)))
     }
 
     @Test

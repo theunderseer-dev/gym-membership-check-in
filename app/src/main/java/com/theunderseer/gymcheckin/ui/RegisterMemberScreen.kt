@@ -28,7 +28,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import com.theunderseer.gymcheckin.model.Member
+import com.theunderseer.gymcheckin.domain.model.Member
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

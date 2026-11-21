@@ -15,7 +15,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import com.theunderseer.gymcheckin.model.Member
+import com.theunderseer.gymcheckin.domain.model.Member
 import com.theunderseer.gymcheckin.ui.CheckMembershipScreen
 import com.theunderseer.gymcheckin.ui.GymViewModel
 import com.theunderseer.gymcheckin.ui.HomeScreen

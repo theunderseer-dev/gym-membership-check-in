@@ -2,29 +2,35 @@
 
 ## Overview
 
-Gym Membership Check-In is a **single-device, offline** prototype. All membership data lives on the device that runs the app. There is no backend, no sync, and no account system — by design (see [ADR-001](adr/001-local-only-storage.md)).
+Gym Membership Check-In is a **single-device, offline** prototype with a **Kotlin Multiplatform (KMP) shared domain layer**. All membership data lives on the device that runs the app. There is no backend, no sync, and no account system — by design (see [ADR-001](adr/001-local-only-storage.md) and [ADR-004](adr/004-kotlin-multiplatform-shared-domain.md)).
 
 ```
 ┌──────────────────────────────────────────────────────────┐
-│                       Presentation                       │
-│   iOS:     HomeView · RegisterMemberView                 │
-│            RegistrationSuccessView · CheckMembershipView │
-│            MemberPhotoCaptureView                        │
-│   Android: HomeScreen · RegisterMemberScreen             │
-│            SuccessScreen · CheckMembershipScreen         │
-└─────────────────────────┬────────────────────────────────┘
-                          │ calls
-┌─────────────────────────▼────────────────────────────────┐
-│                         Domain                           │
-│   Member (model)              MembershipStatus (enum)    │
-│   expiry rule: today ≤ endsOnInclusive                   │
-└─────────────────────────┬────────────────────────────────┘
-                          │ persisted by
-┌─────────────────────────▼────────────────────────────────┐
-│                         Storage                          │
-│   Android: Room (SQLite)                                 │
-│   iOS:     JSON file via FileManager + local photos      │
-└──────────────────────────────────────────────────────────┘
+│              Presentation (Native UI)                    │
+│   iOS:     SwiftUI (HomeView, RegisterMemberView,        │
+│            RegistrationSuccessView, CheckMembershipView, │
+│            MemberPhotoCaptureView)                       │
+│   Android: Jetpack Compose (HomeScreen,                  │
+│            RegisterMemberScreen, SuccessScreen,          │
+│            CheckMembershipScreen)                        │
+└─────────────┬──────────────────────────────┬─────────────┘
+              │ links SharedDomain.xcframework│ gradle project(":shared")
+┌─────────────▼──────────────────────────────▼─────────────┐
+│          Shared Domain Layer (Kotlin Multiplatform)      │
+│   :shared (commonMain)                                   │
+│   • Member (domain model & status logic)                 │
+│   • MembershipStatus (ACTIVE, EXPIRED)                   │
+│   • MemberValidation (client name rules)                 │
+│   • GymRepository (shared repository interface)          │
+│   • Date & UUID arithmetic (kotlinx-datetime)            │
+│   Single source of truth (ADR-004)                       │
+└─────────────┬──────────────────────────────┬─────────────┘
+              │ implemented by               │ implemented by
+┌─────────────▼────────────┐   ┌─────────────▼─────────────┐
+│       Android Storage    │   │         iOS Storage       │
+│   Room (SQLite DAO)      │   │   JSON via FileManager    │
+│   DefaultGymRepository   │   │   + local photos dir      │
+└──────────────────────────┘   └───────────────────────────┘
 ```
 
 ---
@@ -35,15 +41,15 @@ Gym Membership Check-In is a **single-device, offline** prototype. All membershi
 Member
   id              String   — UUID, primary key, encoded in QR
   name            String   — client's display name
-  startsOn        Date     — calendar date of registration
-  endsOnInclusive Date     — startsOn + 1 calendar month
-  createdAt       Date     — wall-clock timestamp of registration
+  startsOn        LocalDate— calendar date of registration (kotlinx-datetime)
+  endsOnInclusive LocalDate— startsOn + 1 calendar month
   photoFileName   String?  — local photo filename (<id>.jpg) for identity verification
 ```
 
-**Expiry calculation** — one calendar month added using the platform's calendar API (`Calendar.add(Calendar.MONTH, 1)` on Android; `Calendar.date(byAdding: .month, value: 1)` on iOS). Edge case: 31 Jan → 28/29 Feb (last day of the month), matching the standard calendar behaviour on both platforms.
-
-**Active status** — `today ≤ endsOnInclusive` (day granularity, time ignored).
+**Shared Domain Single Source of Truth**:
+- **Expiry calculation**: `currentDatePlusMonths(startsOn, 1)` implemented once in `commonMain` using `kotlinx-datetime`. Edge case: 31 Jan → 28/29 Feb (last day of the month), uniformly calculated on all platforms.
+- **Active status rule**: `today <= endsOnInclusive` (day granularity, inclusive boundary).
+- **Validation**: `MemberValidation.validateName(name)` enforces non-empty names and trims whitespace.
 
 ---
 
@@ -92,8 +98,8 @@ Home screen
     │       │                                              │
     │       ▼ (or "Register without Photo")                ▼
     │   Registration success ◄─────────────────────────────┘
-    │       • Unique ID generated (UUID)
-    │       • endsOnInclusive = today + 1 month
+    │       • Unique ID generated via SharedDomain UUID
+    │       • endsOnInclusive = today + 1 month (SharedDomain)
     │       • Photo saved to local photos directory (<id>.jpg)
     │       • Member record saved to local storage
     │       • QR rendered from member ID + Photo preview
@@ -109,7 +115,8 @@ Home screen
                     ▼
                 Look up ID in local storage
                     │
-                    ├─ Found ──► Show ACTIVE / EXPIRED badge
+                    ├─ Found ──► Status evaluated via SharedDomain Member.status(today)
+                    │            Show ACTIVE / EXPIRED badge
                     │            Show stored Member Identity Photo
                     │            Show client name, valid until date, ID
                     │               ├─► Check Another Member → back to scanner
@@ -121,7 +128,7 @@ Home screen
 
 | Situation | Expected behaviour |
 |-----------|-------------------|
-| Name field empty or whitespace-only | Validation error; registration blocked |
+| Name field empty or whitespace-only | Shared `MemberValidation` throws; registration blocked |
 | Tap "Take Photo & Register" with empty name | Validation error: "Client name cannot be empty" |
 | Photo captured, user taps "Retake Photo" | Photo discarded, live camera restarts immediately |
 | Photo captured, user taps "Continue" | Photo confirmed, member registered, QR screen presented |
@@ -133,9 +140,9 @@ Home screen
 | Camera permission denied for QR scanning | Scanner replaced by "Camera Unavailable" message; photo and manual input still work |
 | ID not in local storage | "NOT FOUND" result screen |
 | Member has no photo on file | Displays clean placeholder avatar with "No photo on record" |
-| Membership expiry = today | Status is **Active** (inclusive) |
-| Membership expiry = yesterday | Status is **Expired** |
-| Registration on 31 Jan | endsOnInclusive = 28 Feb (non-leap) or 29 Feb (leap year) |
+| Membership expiry = today | Status is **Active** (inclusive, verified in `commonTest`) |
+| Membership expiry = yesterday | Status is **Expired** (verified in `commonTest`) |
+| Registration on 31 Jan | endsOnInclusive = 28 Feb (non-leap) or 29 Feb (leap year) via SharedDomain |
 
 ---
 
@@ -143,6 +150,8 @@ Home screen
 
 | Concern | Android | iOS |
 |---------|---------|-----|
+| Domain layer | `:shared` (KMP `commonMain`) | `:shared` (`SharedDomain.xcframework`) |
+| Domain tests | `commonTest` (JUnit / kotlin.test) | `commonTest` + `MembershipTests.swift` |
 | Navigation | `NavHost` with typed routes | `NavigationStack` with `AppRoute` enum |
 | State management | `ViewModel` + `StateFlow` | `@StateObject` / `@ObservedObject` |
 | Local storage | Room (DAO + Entity) | JSON encoded to `members.json` + `photos/<id>.jpg` |
@@ -154,7 +163,6 @@ Home screen
 | Photo input | `ActivityResultContracts.OpenDocument` | `PhotosPickerItem` (PhotosUI) |
 | Share QR | `FileProvider` + `ACTION_SEND` intent | `UIActivityViewController` (ShareSheet) |
 | Min OS | Android 8 (API 26) | iOS 16 |
-| Tests | JUnit 4 unit tests | XCTest unit tests |
 
 ---
 
@@ -162,22 +170,28 @@ Home screen
 
 ```
 gym-check-in/
-├── app/                            # Android app module
+├── shared/                         # Kotlin Multiplatform (KMP) shared module
+│   ├── build.gradle.kts            # KMP config (Android target + iOS targets -> XCFramework)
+│   └── src/
+│       ├── commonMain/kotlin/…/    # Member, MembershipStatus, MemberValidation, GymRepository
+│       ├── commonTest/kotlin/…/    # Shared domain unit tests
+│       ├── androidMain/kotlin/…/   # Android actuals (UUID)
+│       └── iosMain/kotlin/…/       # iOS actuals (UUID via NSUUID)
+├── app/                            # Android app module (depends on :shared)
 │   └── src/main/java/…/
-│       ├── data/                   # Room DB, DAO, entities
-│       ├── domain/                 # Member model, membership rules
-│       └── ui/                     # Compose screens
+│       ├── data/                   # Room DB, DAO, DefaultGymRepository
+│       └── ui/                     # Jetpack Compose screens & GymViewModel
 ├── ios/
-│   ├── GymCheckIn.xcodeproj/       # Xcode project
+│   ├── GymCheckIn.xcodeproj/       # Xcode project (links SharedDomain.xcframework)
 │   ├── GymCheckIn/
-│   │   ├── Models/Member.swift     # Data model + status logic + photoFileName
-│   │   ├── Storage/GymRepository.swift  # JSON persistence + photo storage
+│   │   ├── Models/Member.swift     # Member model bridging to SharedDomain
+│   │   ├── Storage/GymRepository.swift # JSON persistence + photo storage (uses SharedDomain)
 │   │   ├── Utilities/              # QRCodeHelper, ShareSheet
 │   │   └── Views/                  # SwiftUI screens (Home, Register, Check, PhotoCapture)
-│   └── GymCheckInTests/            # Unit tests
+│   └── GymCheckInTests/            # Unit tests (including SharedDomain integration)
 ├── docs/
 │   ├── architecture.md             # This file
-│   └── adr/                        # Architecture Decision Records
+│   └── adr/                        # Architecture Decision Records (001-004)
 ├── gradle/wrapper/
 ├── .gitignore
 └── README.md

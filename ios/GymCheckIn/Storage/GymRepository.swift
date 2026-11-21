@@ -1,5 +1,6 @@
 import Foundation
 import UIKit
+import SharedDomain
 
 protocol GymRepositoryProtocol {
     func registerMember(name: String, today: Date, photo: UIImage?) throws -> Member
@@ -62,14 +63,17 @@ final class GymRepository: ObservableObject, GymRepositoryProtocol {
     }
 
     func registerMember(name: String, today: Date = Date(), photo: UIImage? = nil) throws -> Member {
-        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmedName.isEmpty else {
+        let trimmedName: String
+        do {
+            trimmedName = try MemberValidation.shared.validateName(name: name)
+        } catch {
             throw GymError.emptyName
         }
 
-        let calendar = Calendar.current
-        let endsOn = calendar.date(byAdding: .month, value: 1, to: today) ?? today
-        let memberId = UUID().uuidString
+        let startsOnLocalDate = today.toSharedLocalDate()
+        let endsOnLocalDate = DateUtilsKt.currentDatePlusMonths(date: startsOnLocalDate, months: 1)
+        let endsOn = endsOnLocalDate.toDate()
+        let memberId = PlatformUtilsKt.generateUuid()
 
         var photoFileName: String? = nil
         if let photo = photo {

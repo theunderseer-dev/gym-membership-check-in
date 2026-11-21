@@ -3,7 +3,7 @@ package com.theunderseer.gymcheckin
 import android.content.Context
 import com.theunderseer.gymcheckin.data.AppDatabase
 import com.theunderseer.gymcheckin.data.DefaultGymRepository
-import com.theunderseer.gymcheckin.data.GymRepository
+import com.theunderseer.gymcheckin.domain.repository.GymRepository
 
 interface AppContainer {
     val gymRepository: GymRepository
