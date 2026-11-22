@@ -43,7 +43,7 @@ struct Member: Identifiable, Codable, Equatable, Hashable {
     var photoFileName: String?
 
     init(
-        id: String = PlatformUtilsKt.generateUuid(),
+        id: String = MemberIdGeneratorKt.generateMemberId(),
         name: String,
         startsOn: Date = Date(),
         endsOnInclusive: Date? = nil,

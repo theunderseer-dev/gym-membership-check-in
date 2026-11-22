@@ -19,10 +19,10 @@ The QR code on a member's pass must carry enough information for the app to look
 
 **Option B — member ID only.**
 
-The QR encodes a single UUID string, e.g.:
+The QR encodes a single member ID string (originally UUIDv4, updated to a 6-character Crockford Base32 key in [ADR-005](005-short-member-id-format.md)), e.g.:
 
 ```
-550e8400-e29b-41d4-a716-446655440000
+K7X-9M2
 ```
 
 The app looks up the ID in local storage and reads the current membership data at scan time.

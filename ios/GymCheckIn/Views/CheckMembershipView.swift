@@ -215,10 +215,10 @@ struct CheckMembershipView: View {
 
                 VStack(alignment: .leading, spacing: 8) {
                     HStack {
-                        TextField("Enter member ID", text: $manualIdInput)
+                        TextField("e.g. K7X-9M2", text: $manualIdInput)
                             .textFieldStyle(.plain)
                             .autocorrectionDisabled()
-                            .textInputAutocapitalization(.never)
+                            .textInputAutocapitalization(.characters)
 
                         if !manualIdInput.isEmpty {
                             Button {

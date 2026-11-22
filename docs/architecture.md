@@ -39,7 +39,7 @@ Gym Membership Check-In is a **single-device, offline** prototype with a **Kotli
 
 ```
 Member
-  id              String   — UUID, primary key, encoded in QR
+  id              String   — 6-char Crockford Base32 key (XXX-XXX, e.g. "K7X-9M2"), primary key, encoded in QR
   name            String   — client's display name
   startsOn        LocalDate— calendar date of registration (kotlinx-datetime)
   endsOnInclusive LocalDate— startsOn + 1 calendar month
@@ -47,6 +47,7 @@ Member
 ```
 
 **Shared Domain Single Source of Truth**:
+- **Member ID Generation & Normalization**: `MemberIdGenerator` generates 6-character Crockford Base32 keys (`XXX-XXX`) with 1+ billion unique combinations (see [ADR-005](adr/005-short-member-id-format.md)). Normalizer handles case-insensitivity, spaces, dashes, and Crockford error tolerances (`O`->`0`, `I`/`L`->`1`).
 - **Expiry calculation**: `currentDatePlusMonths(startsOn, 1)` implemented once in `commonMain` using `kotlinx-datetime`. Edge case: 31 Jan → 28/29 Feb (last day of the month), uniformly calculated on all platforms.
 - **Active status rule**: `today <= endsOnInclusive` (day granularity, inclusive boundary).
 - **Validation**: `MemberValidation.validateName(name)` enforces non-empty names and trims whitespace.
@@ -68,10 +69,10 @@ To solve this without complex biometric backends:
 
 ## QR format
 
-See [ADR-002](adr/002-qr-payload-format.md). The QR encodes only the **member ID** (a UUID string). Example payload:
+See [ADR-002](adr/002-qr-payload-format.md) and [ADR-005](adr/005-short-member-id-format.md). The QR encodes only the **member ID** (a human-friendly 6-character Crockford Base32 key). Example payload:
 
 ```
-550e8400-e29b-41d4-a716-446655440000
+K7X-9M2
 ```
 
 The ID is looked up in local storage on scan. No personal data is stored in the QR.
@@ -98,7 +99,7 @@ Home screen
     │       │                                              │
     │       ▼ (or "Register without Photo")                ▼
     │   Registration success ◄─────────────────────────────┘
-    │       • Unique ID generated via SharedDomain UUID
+    │       • Unique ID generated via SharedDomain (XXX-XXX)
     │       • endsOnInclusive = today + 1 month (SharedDomain)
     │       • Photo saved to local photos directory (<id>.jpg)
     │       • Member record saved to local storage

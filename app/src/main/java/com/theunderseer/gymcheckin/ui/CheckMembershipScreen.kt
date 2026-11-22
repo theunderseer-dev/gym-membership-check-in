@@ -331,9 +331,12 @@ fun CheckMembershipScreen(
                             value = uiState.checkInputId,
                             onValueChange = onIdChange,
                             label = { Text("Member ID") },
-                            placeholder = { Text("Enter client ID") },
+                            placeholder = { Text("e.g. K7X-9M2") },
                             singleLine = true,
-                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                            keyboardOptions = KeyboardOptions(
+                                capitalization = androidx.compose.ui.text.input.KeyboardCapitalization.Characters,
+                                imeAction = ImeAction.Search
+                            ),
                             keyboardActions = KeyboardActions(onSearch = {
                                 focusManager.clearFocus()
                                 onCheckClick(null)
