@@ -1,8 +1,8 @@
 package com.theunderseer.gymcheckin.domain.model
 
-import kotlinx.datetime.LocalDate
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlinx.datetime.LocalDate
 
 class MembershipPlanTest {
 
@@ -32,10 +32,22 @@ class MembershipPlanTest {
     fun calculateEndDate_endOfMonthClamping() {
         // Non-leap year
         val jan31NonLeap = LocalDate(2026, 1, 31)
-        assertEquals(LocalDate(2026, 2, 28), MembershipPlan.ONE_MONTH.calculateEndDate(jan31NonLeap))
-        assertEquals(LocalDate(2026, 4, 30), MembershipPlan.THREE_MONTHS.calculateEndDate(jan31NonLeap))
-        assertEquals(LocalDate(2026, 7, 31), MembershipPlan.SIX_MONTHS.calculateEndDate(jan31NonLeap))
-        assertEquals(LocalDate(2027, 1, 31), MembershipPlan.TWELVE_MONTHS.calculateEndDate(jan31NonLeap))
+        assertEquals(
+            LocalDate(2026, 2, 28),
+            MembershipPlan.ONE_MONTH.calculateEndDate(jan31NonLeap)
+        )
+        assertEquals(
+            LocalDate(2026, 4, 30),
+            MembershipPlan.THREE_MONTHS.calculateEndDate(jan31NonLeap)
+        )
+        assertEquals(
+            LocalDate(2026, 7, 31),
+            MembershipPlan.SIX_MONTHS.calculateEndDate(jan31NonLeap)
+        )
+        assertEquals(
+            LocalDate(2027, 1, 31),
+            MembershipPlan.TWELVE_MONTHS.calculateEndDate(jan31NonLeap)
+        )
 
         // Leap year
         val jan31Leap = LocalDate(2024, 1, 31)
@@ -43,7 +55,10 @@ class MembershipPlanTest {
 
         // Leap day + 12 months -> Feb 28 next year
         val feb29Leap = LocalDate(2024, 2, 29)
-        assertEquals(LocalDate(2025, 2, 28), MembershipPlan.TWELVE_MONTHS.calculateEndDate(feb29Leap))
+        assertEquals(
+            LocalDate(2025, 2, 28),
+            MembershipPlan.TWELVE_MONTHS.calculateEndDate(feb29Leap)
+        )
     }
 
     @Test

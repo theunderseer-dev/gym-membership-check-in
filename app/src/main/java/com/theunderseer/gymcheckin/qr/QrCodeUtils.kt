@@ -60,7 +60,7 @@ object QrCodeUtils {
             if (!cardsDir.exists()) {
                 cardsDir.mkdirs()
             }
-            val file = File(cardsDir, "qr_${memberId}.png")
+            val file = File(cardsDir, "qr_$memberId.png")
             FileOutputStream(file).use { out ->
                 qrBitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
             }
@@ -161,32 +161,17 @@ class QrCodeAnalyzer(
         }
 
         try {
-            val plane = image.planes[0]
-            val buffer = plane.buffer
-            val rowStride = plane.rowStride
-            val pixelStride = plane.pixelStride
             val width = image.width
             val height = image.height
-
-            val yBytes = ByteArray(width * height)
-            var destIndex = 0
-            for (row in 0 until height) {
-                buffer.position(row * rowStride)
-                if (pixelStride == 1) {
-                    buffer.get(yBytes, destIndex, width)
-                    destIndex += width
-                } else {
-                    for (col in 0 until width) {
-                        yBytes[destIndex++] = buffer.get()
-                        if (pixelStride > 1 && col < width - 1) {
-                            buffer.position(buffer.position() + pixelStride - 1)
-                        }
-                    }
-                }
-            }
+            val yBytes = extractYPlane(image)
 
             val rotationDegrees = image.imageInfo.rotationDegrees
-            val (rotatedBytes, rotWidth, rotHeight) = rotateYuv(yBytes, width, height, rotationDegrees)
+            val (rotatedBytes, rotWidth, rotHeight) = rotateYuv(
+                yBytes,
+                width,
+                height,
+                rotationDegrees
+            )
 
             val source = PlanarYUVLuminanceSource(
                 rotatedBytes,
@@ -213,6 +198,31 @@ class QrCodeAnalyzer(
             reader.reset()
             image.close()
         }
+    }
+
+    private fun extractYPlane(image: ImageProxy): ByteArray {
+        val plane = image.planes[0]
+        val buffer = plane.buffer
+        val rowStride = plane.rowStride
+        val pixelStride = plane.pixelStride
+        val width = image.width
+        val height = image.height
+
+        val yBytes = ByteArray(width * height)
+        var destIndex = 0
+        for (row in 0 until height) {
+            val rowStart = row * rowStride
+            if (pixelStride == 1) {
+                buffer.position(rowStart)
+                buffer.get(yBytes, destIndex, width)
+                destIndex += width
+            } else {
+                for (col in 0 until width) {
+                    yBytes[destIndex++] = buffer.get(rowStart + col * pixelStride)
+                }
+            }
+        }
+        return yBytes
     }
 
     private fun rotateYuv(

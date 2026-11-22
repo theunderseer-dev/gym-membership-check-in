@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -28,10 +27,7 @@ import androidx.core.content.ContextCompat
 import com.theunderseer.gymcheckin.qr.QrCodeAnalyzer
 
 @Composable
-fun CameraScannerView(
-    onQrScanned: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
+fun CameraScannerView(onQrScanned: (String) -> Unit, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val cameraProviderFuture = remember { ProcessCameraProvider.getInstance(context) }
@@ -69,8 +65,12 @@ fun CameraScannerView(
                             }
 
                         val cameraSelector = when {
-                            cameraProvider.hasCamera(CameraSelector.DEFAULT_BACK_CAMERA) -> CameraSelector.DEFAULT_BACK_CAMERA
-                            cameraProvider.hasCamera(CameraSelector.DEFAULT_FRONT_CAMERA) -> CameraSelector.DEFAULT_FRONT_CAMERA
+                            cameraProvider.hasCamera(
+                                CameraSelector.DEFAULT_BACK_CAMERA
+                            ) -> CameraSelector.DEFAULT_BACK_CAMERA
+                            cameraProvider.hasCamera(
+                                CameraSelector.DEFAULT_FRONT_CAMERA
+                            ) -> CameraSelector.DEFAULT_FRONT_CAMERA
                             else -> CameraSelector.DEFAULT_BACK_CAMERA
                         }
 

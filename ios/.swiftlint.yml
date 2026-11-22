@@ -1,0 +1,55 @@
+included:
+  - GymCheckIn
+  - GymCheckInTests
+
+excluded:
+  - GymCheckIn.xcodeproj
+
+disabled_rules:
+  - redundant_optional_initialization
+  - multiple_closures_with_trailing_closure
+  - trailing_comma
+  - cyclomatic_complexity
+  - large_tuple
+  - closure_parameter_position
+  - inclusive_language
+
+opt_in_rules:
+  - empty_count
+  - empty_string
+
+line_length:
+  warning: 160
+  error: 200
+  ignores_comments: true
+  ignores_urls: true
+  ignores_interpolated_strings: true
+
+file_length:
+  warning: 600
+  error: 800
+
+type_body_length:
+  warning: 500
+  error: 700
+
+function_body_length:
+  warning: 160
+  error: 260
+
+function_parameter_count:
+  warning: 8
+  error: 10
+
+identifier_name:
+  min_length:
+    warning: 2
+    error: 1
+  excluded:
+    - id
+    - x
+    - y
+    - i
+    - to
+    - at
+    - by

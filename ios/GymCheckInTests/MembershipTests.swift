@@ -187,10 +187,22 @@ final class MembershipTests: XCTestCase {
 
     func testMembershipPlans_expirationDates() throws {
         let start = SharedDomain.LocalDate(year: 2026, monthNumber: 2, dayOfMonth: 15)
-        XCTAssertEqual(SharedDomain.MembershipPlan.oneMonth.calculateEndDate(startDate: start), SharedDomain.LocalDate(year: 2026, monthNumber: 3, dayOfMonth: 15))
-        XCTAssertEqual(SharedDomain.MembershipPlan.threeMonths.calculateEndDate(startDate: start), SharedDomain.LocalDate(year: 2026, monthNumber: 5, dayOfMonth: 15))
-        XCTAssertEqual(SharedDomain.MembershipPlan.sixMonths.calculateEndDate(startDate: start), SharedDomain.LocalDate(year: 2026, monthNumber: 8, dayOfMonth: 15))
-        XCTAssertEqual(SharedDomain.MembershipPlan.twelveMonths.calculateEndDate(startDate: start), SharedDomain.LocalDate(year: 2027, monthNumber: 2, dayOfMonth: 15))
+        XCTAssertEqual(
+            SharedDomain.MembershipPlan.oneMonth.calculateEndDate(startDate: start),
+            SharedDomain.LocalDate(year: 2026, monthNumber: 3, dayOfMonth: 15)
+        )
+        XCTAssertEqual(
+            SharedDomain.MembershipPlan.threeMonths.calculateEndDate(startDate: start),
+            SharedDomain.LocalDate(year: 2026, monthNumber: 5, dayOfMonth: 15)
+        )
+        XCTAssertEqual(
+            SharedDomain.MembershipPlan.sixMonths.calculateEndDate(startDate: start),
+            SharedDomain.LocalDate(year: 2026, monthNumber: 8, dayOfMonth: 15)
+        )
+        XCTAssertEqual(
+            SharedDomain.MembershipPlan.twelveMonths.calculateEndDate(startDate: start),
+            SharedDomain.LocalDate(year: 2027, monthNumber: 2, dayOfMonth: 15)
+        )
 
         let tempDir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
