@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.theunderseer.gymcheckin.domain.model.Member
+import com.theunderseer.gymcheckin.domain.model.MembershipPlan
 import com.theunderseer.gymcheckin.domain.model.MembershipStatus
 import com.theunderseer.gymcheckin.domain.repository.GymRepository
 import com.theunderseer.gymcheckin.domain.util.currentDate
@@ -20,6 +21,7 @@ sealed interface CheckResult {
 data class GymUiState(
     // Registration
     val registrationName: String = "",
+    val selectedPlan: MembershipPlan = MembershipPlan.ONE_MONTH,
     val registrationError: String? = null,
     val isRegistering: Boolean = false,
     val registeredMember: Member? = null,
@@ -44,6 +46,10 @@ class GymViewModel(
         )
     }
 
+    fun onPlanSelected(plan: MembershipPlan) {
+        _uiState.value = _uiState.value.copy(selectedPlan = plan)
+    }
+
     fun registerMember(onSuccess: (Member) -> Unit) {
         val trimmed = _uiState.value.registrationName.trim()
         if (trimmed.isEmpty()) {
@@ -51,13 +57,15 @@ class GymViewModel(
             return
         }
 
+        val plan = _uiState.value.selectedPlan
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isRegistering = true, registrationError = null)
             try {
-                val member = repository.registerMember(trimmed)
+                val member = repository.registerMember(name = trimmed, plan = plan)
                 _uiState.value = _uiState.value.copy(
                     isRegistering = false,
                     registrationName = "",
+                    selectedPlan = MembershipPlan.ONE_MONTH,
                     registeredMember = member
                 )
                 onSuccess(member)

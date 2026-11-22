@@ -10,6 +10,7 @@ import com.google.zxing.qrcode.QRCodeReader
 import com.google.zxing.qrcode.QRCodeWriter
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import com.theunderseer.gymcheckin.domain.model.Member
+import com.theunderseer.gymcheckin.domain.model.MembershipPlan
 import com.theunderseer.gymcheckin.domain.model.MembershipStatus
 import com.theunderseer.gymcheckin.domain.util.MemberIdGenerator
 import com.theunderseer.gymcheckin.domain.util.currentDatePlusMonths
@@ -119,5 +120,14 @@ class MembershipTest {
         assertThrows(NotFoundException::class.java) {
             reader.decode(binaryBitmap)
         }
+    }
+
+    @Test
+    fun testMembershipPlans_calculateEndDates() {
+        val start = LocalDate(2026, 2, 15)
+        assertEquals(LocalDate(2026, 3, 15), MembershipPlan.ONE_MONTH.calculateEndDate(start))
+        assertEquals(LocalDate(2026, 5, 15), MembershipPlan.THREE_MONTHS.calculateEndDate(start))
+        assertEquals(LocalDate(2026, 8, 15), MembershipPlan.SIX_MONTHS.calculateEndDate(start))
+        assertEquals(LocalDate(2027, 2, 15), MembershipPlan.TWELVE_MONTHS.calculateEndDate(start))
     }
 }

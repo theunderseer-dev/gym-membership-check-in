@@ -3,7 +3,7 @@ import UIKit
 import SharedDomain
 
 protocol GymRepositoryProtocol {
-    func registerMember(name: String, today: Date, photo: UIImage?) throws -> Member
+    func registerMember(name: String, plan: SharedDomain.MembershipPlan, today: Date, photo: UIImage?) throws -> Member
     func getMember(byId id: String) -> Member?
     func getAllMembers() -> [Member]
     func getPhoto(for member: Member) -> UIImage?
@@ -67,7 +67,12 @@ final class GymRepository: ObservableObject, GymRepositoryProtocol {
         }
     }
 
-    func registerMember(name: String, today: Date = Date(), photo: UIImage? = nil) throws -> Member {
+    func registerMember(
+        name: String,
+        plan: SharedDomain.MembershipPlan = .oneMonth,
+        today: Date = Date(),
+        photo: UIImage? = nil
+    ) throws -> Member {
         let trimmedName: String
         do {
             trimmedName = try MemberValidation.shared.validateName(name: name)
@@ -76,7 +81,7 @@ final class GymRepository: ObservableObject, GymRepositoryProtocol {
         }
 
         let startsOnLocalDate = today.toSharedLocalDate()
-        let endsOnLocalDate = DateUtilsKt.currentDatePlusMonths(date: startsOnLocalDate, months: 1)
+        let endsOnLocalDate = plan.calculateEndDate(startDate: startsOnLocalDate)
         let endsOn = endsOnLocalDate.toDate()
         let memberId = MemberIdGeneratorKt.generateMemberId()
 
