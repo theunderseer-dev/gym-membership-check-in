@@ -296,17 +296,9 @@ struct CheckMembershipView: View {
                                 )
                                 .shadow(color: .black.opacity(0.12), radius: 8, x: 0, y: 4)
 
-                            HStack(spacing: 4) {
-                                Image(systemName: "person.crop.rectangle.badge.checkmark")
-                                    .foregroundStyle(statusColor)
-                                Text("Registered Member Photo")
-                                    .font(.caption.bold())
-                                    .foregroundStyle(.secondary)
-                            }
-
                             Text("Verify person matches photo on record")
-                                .font(.caption2)
-                                .foregroundStyle(.tertiary)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
                         }
                     } else {
                         VStack(spacing: 6) {
