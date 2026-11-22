@@ -28,7 +28,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -344,7 +343,10 @@ fun CheckMembershipScreen(
                             trailingIcon = {
                                 if (uiState.checkInputId.isNotEmpty()) {
                                     IconButton(onClick = { onIdChange("") }) {
-                                        Icon(imageVector = Icons.Default.Close, contentDescription = "Clear")
+                                        Icon(
+                                            imageVector = Icons.Default.Close,
+                                            contentDescription = "Clear"
+                                        )
                                     }
                                 }
                             },
@@ -369,7 +371,10 @@ fun CheckMembershipScreen(
                                     modifier = Modifier.height(24.dp)
                                 )
                             } else {
-                                Icon(imageVector = Icons.Default.Search, contentDescription = "Check")
+                                Icon(
+                                    imageVector = Icons.Default.Search,
+                                    contentDescription = "Check"
+                                )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text("Check", style = MaterialTheme.typography.titleMedium)
                             }

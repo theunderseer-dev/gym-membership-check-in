@@ -12,9 +12,7 @@ import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import com.theunderseer.gymcheckin.domain.model.Member
 import com.theunderseer.gymcheckin.domain.model.MembershipPlan
 import com.theunderseer.gymcheckin.domain.model.MembershipStatus
-import com.theunderseer.gymcheckin.domain.util.MemberIdGenerator
 import com.theunderseer.gymcheckin.domain.util.currentDatePlusMonths
-import com.theunderseer.gymcheckin.qr.QrCodeUtils
 import kotlinx.datetime.LocalDate
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows

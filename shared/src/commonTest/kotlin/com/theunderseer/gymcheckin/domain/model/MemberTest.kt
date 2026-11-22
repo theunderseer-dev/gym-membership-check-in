@@ -1,9 +1,8 @@
 package com.theunderseer.gymcheckin.domain.model
 
-import kotlinx.datetime.LocalDate
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
+import kotlinx.datetime.LocalDate
 
 class MemberTest {
 

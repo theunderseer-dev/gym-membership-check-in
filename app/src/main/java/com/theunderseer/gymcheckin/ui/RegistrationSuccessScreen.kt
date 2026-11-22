@@ -166,7 +166,11 @@ fun RegistrationSuccessScreen(
                         OutlinedButton(
                             onClick = {
                                 clipboardManager.setText(AnnotatedString(member.id))
-                                Toast.makeText(context, "ID copied to clipboard", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                    context,
+                                    "ID copied to clipboard",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             },
                             modifier = Modifier.padding(start = 8.dp)
                         ) {

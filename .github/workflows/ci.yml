@@ -1,0 +1,107 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  android-and-shared:
+    name: Android & KMP Shared
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up JDK
+        uses: actions/setup-java@v6
+        with:
+          distribution: zulu
+          java-version: "17"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          cache-provider: basic
+
+      - name: Run verification
+        run: >
+          ./gradlew
+          :shared:testDebugUnitTest
+          :app:testDebugUnitTest
+          :app:lintDebug
+          ktlintCheck
+          detekt
+          :shared:koverVerify
+          --stacktrace
+
+      - name: Generate coverage report
+        if: ${{ !cancelled() }}
+        run: ./gradlew :shared:koverXmlReportDebug
+
+      - name: Upload coverage report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: shared-kover-coverage
+          path: shared/build/reports/kover/reportDebug.xml
+          if-no-files-found: warn
+
+  ios:
+    name: iOS Build, Tests & SwiftLint
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up JDK
+        uses: actions/setup-java@v6
+        with:
+          distribution: zulu
+          java-version: "17"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          cache-provider: basic
+
+      - name: Run SwiftLint
+        working-directory: ios
+        run: |
+          if ! command -v swiftlint >/dev/null 2>&1; then
+            brew install swiftlint
+          fi
+          swiftlint lint --strict
+
+      - name: Build SharedDomain XCFramework
+        run: ./gradlew :shared:assembleSharedDomainReleaseXCFramework --stacktrace
+
+      - name: Build and test iOS app
+        run: |
+          SIMULATOR_ID=$(xcrun simctl list devices available iPhone | grep -m1 -oE '[A-F0-9-]{36}' || true)
+          if [ -n "$SIMULATOR_ID" ]; then
+            xcodebuild test \
+              -project ios/GymCheckIn.xcodeproj \
+              -scheme GymCheckIn \
+              -destination "id=$SIMULATOR_ID" \
+              CODE_SIGNING_ALLOWED=NO
+          else
+            xcodebuild build-for-testing \
+              -project ios/GymCheckIn.xcodeproj \
+              -scheme GymCheckIn \
+              -destination "generic/platform=iOS Simulator" \
+              CODE_SIGNING_ALLOWED=NO
+          fi

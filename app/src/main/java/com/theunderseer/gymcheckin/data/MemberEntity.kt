@@ -8,7 +8,9 @@ data class MemberEntity(
     @PrimaryKey
     val id: String,
     val name: String,
-    val startsOn: String, // ISO-8601 YYYY-MM-DD
-    val endsOnInclusive: String, // ISO-8601 YYYY-MM-DD
+    // ISO-8601 YYYY-MM-DD
+    val startsOn: String,
+    // ISO-8601 YYYY-MM-DD
+    val endsOnInclusive: String,
     val createdAt: Long = System.currentTimeMillis()
 )
