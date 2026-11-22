@@ -1,14 +1,12 @@
 import SwiftUI
 
 struct RegisterMemberView: View {
-    @ObservedObject var repository: GymRepository
+    let repository: GymRepository
     var onRegistered: ((Member) -> Void)? = nil
 
     @State private var name: String = ""
     @State private var isShowingCameraSheet: Bool = false
     @State private var errorMessage: String? = nil
-    @State private var createdMember: Member? = nil
-    @State private var navigateToSuccess: Bool = false
     @FocusState private var isNameFocused: Bool
 
     var body: some View {
@@ -30,19 +28,32 @@ struct RegisterMemberView: View {
                     .font(.caption.bold())
                     .foregroundStyle(.secondary)
 
-                TextField("Enter client's full name", text: $name)
-                    .textFieldStyle(.plain)
-                    .padding()
-                    .background(Color(.secondarySystemGroupedBackground))
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(errorMessage != nil ? Color.red : Color(.separator), lineWidth: 1)
-                    )
-                    .focused($isNameFocused)
-                    .autocorrectionDisabled()
-                    .submitLabel(.done)
-                    .onSubmit(openCameraOrRegister)
+                HStack {
+                    TextField("Enter client's full name", text: $name)
+                        .textFieldStyle(.plain)
+                        .frame(minHeight: 24)
+                        .focused($isNameFocused)
+                        .autocorrectionDisabled()
+                        .submitLabel(.done)
+                        .onSubmit(openCameraOrRegister)
+                }
+                .padding()
+                .background(
+                    Color(.secondarySystemGroupedBackground)
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            isNameFocused = true
+                        }
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(
+                            errorMessage != nil ? Color.red : (isNameFocused ? Color.blue : Color(.separator)),
+                            lineWidth: isNameFocused ? 1.5 : 1
+                        )
+                        .allowsHitTesting(false)
+                )
 
                 if let error = errorMessage {
                     Text(error)
@@ -89,11 +100,6 @@ struct RegisterMemberView: View {
                 register(withPhoto: confirmedImage)
             }
         }
-        .navigationDestination(isPresented: $navigateToSuccess) {
-            if let member = createdMember {
-                RegistrationSuccessView(member: member, repository: repository)
-            }
-        }
     }
 
     private func openCameraOrRegister() {
@@ -121,12 +127,7 @@ struct RegisterMemberView: View {
         do {
             let member = try repository.registerMember(name: trimmed, photo: photo)
             name = ""
-            if let onRegistered = onRegistered {
-                onRegistered(member)
-            } else {
-                createdMember = member
-                navigateToSuccess = true
-            }
+            onRegistered?(member)
         } catch {
             errorMessage = error.localizedDescription
         }
