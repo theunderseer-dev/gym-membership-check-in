@@ -11,6 +11,7 @@ import com.google.zxing.qrcode.QRCodeWriter
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import com.theunderseer.gymcheckin.domain.model.Member
 import com.theunderseer.gymcheckin.domain.model.MembershipStatus
+import com.theunderseer.gymcheckin.domain.util.MemberIdGenerator
 import com.theunderseer.gymcheckin.domain.util.currentDatePlusMonths
 import com.theunderseer.gymcheckin.qr.QrCodeUtils
 import kotlinx.datetime.LocalDate
@@ -81,7 +82,7 @@ class MembershipTest {
 
     @Test
     fun testQrCodeRoundTrip() {
-        val testId = "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d"
+        val testId = "K7X-9M2"
         val hints = mapOf(
             EncodeHintType.MARGIN to 1,
             EncodeHintType.ERROR_CORRECTION to ErrorCorrectionLevel.M

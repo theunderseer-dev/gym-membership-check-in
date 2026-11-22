@@ -105,7 +105,7 @@ final class MembershipTests: XCTestCase {
     }
 
     func testQRCodeRoundTrip() {
-        let testId = "e87b7381-8b8a-4c28-98e3-0d3f28f41e57"
+        let testId = "K7X-9M2"
         guard let qrImage = QRCodeHelper.generateQRCode(from: testId) else {
             XCTFail("Failed to generate QR image")
             return
@@ -168,5 +168,20 @@ final class MembershipTests: XCTestCase {
         )
         XCTAssertEqual(member.status(today: SharedDomain.LocalDate(year: 2026, monthNumber: 3, dayOfMonth: 2)), .active)
         XCTAssertEqual(member.status(today: SharedDomain.LocalDate(year: 2026, monthNumber: 3, dayOfMonth: 3)), .expired)
+    }
+
+    func testShortMemberId_generationAndNormalization() {
+        let generated = MemberIdGeneratorKt.generateMemberId()
+        XCTAssertEqual(generated.count, 7)
+        XCTAssertEqual(generated[generated.index(generated.startIndex, offsetBy: 3)], "-")
+
+        let normalized = MemberIdGeneratorKt.normalizeMemberId(input: "k7x9m2")
+        XCTAssertEqual(normalized, "K7X-9M2")
+
+        let normalizedWithSpaces = MemberIdGeneratorKt.normalizeMemberId(input: "  k7x 9m2  ")
+        XCTAssertEqual(normalizedWithSpaces, "K7X-9M2")
+
+        let normalizedTolerance = MemberIdGeneratorKt.normalizeMemberId(input: "kol-9im")
+        XCTAssertEqual(normalizedTolerance, "K01-91M")
     }
 }

@@ -5,7 +5,8 @@ import com.theunderseer.gymcheckin.domain.model.MemberValidation
 import com.theunderseer.gymcheckin.domain.repository.GymRepository
 import com.theunderseer.gymcheckin.domain.util.currentDate
 import com.theunderseer.gymcheckin.domain.util.currentDatePlusMonths
-import com.theunderseer.gymcheckin.domain.util.generateUuid
+import com.theunderseer.gymcheckin.domain.util.generateMemberId
+import com.theunderseer.gymcheckin.domain.util.normalizeMemberId
 import kotlinx.datetime.LocalDate
 
 class DefaultGymRepository(
@@ -17,7 +18,7 @@ class DefaultGymRepository(
 
         val startsOn = today
         val endsOnInclusive = currentDatePlusMonths(startsOn, 1)
-        val id = generateUuid()
+        val id = generateMemberId()
 
         val entity = MemberEntity(
             id = id,
@@ -36,9 +37,9 @@ class DefaultGymRepository(
     }
 
     override suspend fun getMemberById(id: String): Member? {
-        val trimmedId = id.trim()
-        if (trimmedId.isEmpty()) return null
-        val entity = memberDao.getMemberById(trimmedId) ?: return null
+        val normalizedId = normalizeMemberId(id)
+        if (normalizedId.isEmpty()) return null
+        val entity = memberDao.getMemberById(normalizedId) ?: return null
         return Member(
             id = entity.id,
             name = entity.name,

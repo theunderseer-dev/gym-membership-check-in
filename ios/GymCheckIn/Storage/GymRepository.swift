@@ -44,7 +44,12 @@ final class GymRepository: ObservableObject, GymRepositoryProtocol {
             let data = try Data(contentsOf: fileURL)
             let decoder = JSONDecoder()
             decoder.dateDecodingStrategy = .iso8601
-            members = try decoder.decode([Member].self, from: data)
+            let loaded = try decoder.decode([Member].self, from: data)
+            // Filter to keep only 6-character short IDs (purging legacy UUID test records)
+            members = loaded.filter { MemberIdGeneratorKt.normalizeMemberId(input: $0.id).count == 7 }
+            if members.count != loaded.count {
+                saveMembers()
+            }
         } catch {
             print("Failed to load members: \(error)")
         }
@@ -73,7 +78,7 @@ final class GymRepository: ObservableObject, GymRepositoryProtocol {
         let startsOnLocalDate = today.toSharedLocalDate()
         let endsOnLocalDate = DateUtilsKt.currentDatePlusMonths(date: startsOnLocalDate, months: 1)
         let endsOn = endsOnLocalDate.toDate()
-        let memberId = PlatformUtilsKt.generateUuid()
+        let memberId = MemberIdGeneratorKt.generateMemberId()
 
         var photoFileName: String? = nil
         if let photo = photo {
@@ -130,9 +135,9 @@ final class GymRepository: ObservableObject, GymRepositoryProtocol {
     }
 
     func getMember(byId id: String) -> Member? {
-        let trimmed = id.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return nil }
-        return members.first { $0.id.caseInsensitiveCompare(trimmed) == .orderedSame }
+        let normalized = MemberIdGeneratorKt.normalizeMemberId(input: id)
+        guard !normalized.isEmpty else { return nil }
+        return members.first { $0.id.caseInsensitiveCompare(normalized) == .orderedSame }
     }
 
     func getAllMembers() -> [Member] {
