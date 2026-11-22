@@ -1,7 +1,7 @@
 # ADR-004 — Kotlin Multiplatform (KMP) Shared Domain Module
 
-**Date:** 2026-11  
-**Status:** Accepted  
+**Date:** 2026-11
+**Status:** Accepted (scope refined to pragmatic domain-only KMP under an iOS-primary strategy in [ADR-006](006-target-architecture-standards.md))
 **Supersedes:** ADR-003 trade-off mitigation path
 
 ---

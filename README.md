@@ -66,11 +66,20 @@ For a physical iPhone, open `ios/GymCheckIn.xcodeproj` in Xcode, set your team u
 
 ## Docs
 
-- **[Architecture & design](docs/architecture.md)** — layers, data model, QR format, edge cases, platform comparison.
+- **[Agent instructions](AGENTS.md)** — project entry point, iOS-primary strategy, core constraints, and documentation index.
+- **[Architecture](docs/architecture.md)** — platform strategy, Current vs Planned vs Optional decisions, KMP boundary, offline-first + planned cloud sync, business rules, and user flows.
+- **[Concurrency, threading & UI performance](docs/concurrency-and-performance.md)** — mandatory main-thread safety, Swift Structured Concurrency, Kotlin coroutines, and performance profiling rules.
+- **[Development workflow](docs/development-workflow.md)** — branching, Conventional Commits, scope-proportional verification, and PR description format.
+- **[Testing & verification](docs/testing.md)** — test priorities, deterministic vs production IDs, verification commands, and CI alignment.
+- **[Security, privacy & data recovery](docs/security-and-data.md)** — sync vs backup distinction, PII & photo protection, secure IDs, and schema evolution.
+- **[Code review rules](docs/code-review.md)** — review priorities, mandatory concurrency criteria, and platform checklists.
 - **ADRs** — key decisions with context and rationale:
   - [ADR-001 Local-only storage](docs/adr/001-local-only-storage.md)
   - [ADR-002 QR payload format](docs/adr/002-qr-payload-format.md)
   - [ADR-003 Separate native apps per platform](docs/adr/003-native-per-platform.md)
+  - [ADR-004 Kotlin Multiplatform shared domain](docs/adr/004-kotlin-multiplatform-shared-domain.md)
+  - [ADR-005 Short member ID format](docs/adr/005-short-member-id-format.md)
+  - [ADR-006 iOS-primary strategy, pragmatic KMP scope & sync roadmap](docs/adr/006-target-architecture-standards.md)
 
 ---
 
