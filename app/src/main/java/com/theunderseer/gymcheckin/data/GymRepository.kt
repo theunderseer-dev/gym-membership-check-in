@@ -2,9 +2,8 @@ package com.theunderseer.gymcheckin.data
 
 import com.theunderseer.gymcheckin.domain.model.Member
 import com.theunderseer.gymcheckin.domain.model.MemberValidation
+import com.theunderseer.gymcheckin.domain.model.MembershipPlan
 import com.theunderseer.gymcheckin.domain.repository.GymRepository
-import com.theunderseer.gymcheckin.domain.util.currentDate
-import com.theunderseer.gymcheckin.domain.util.currentDatePlusMonths
 import com.theunderseer.gymcheckin.domain.util.generateMemberId
 import com.theunderseer.gymcheckin.domain.util.normalizeMemberId
 import kotlinx.datetime.LocalDate
@@ -13,11 +12,15 @@ class DefaultGymRepository(
     private val memberDao: MemberDao
 ) : GymRepository {
 
-    override suspend fun registerMember(name: String, today: LocalDate): Member {
+    override suspend fun registerMember(
+        name: String,
+        plan: MembershipPlan,
+        today: LocalDate
+    ): Member {
         val trimmedName = MemberValidation.validateName(name)
 
         val startsOn = today
-        val endsOnInclusive = currentDatePlusMonths(startsOn, 1)
+        val endsOnInclusive = plan.calculateEndDate(startsOn)
         val id = generateMemberId()
 
         val entity = MemberEntity(

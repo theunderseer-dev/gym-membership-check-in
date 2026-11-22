@@ -184,4 +184,27 @@ final class MembershipTests: XCTestCase {
         let normalizedTolerance = MemberIdGeneratorKt.normalizeMemberId(input: "kol-9im")
         XCTAssertEqual(normalizedTolerance, "K01-91M")
     }
+
+    func testMembershipPlans_expirationDates() throws {
+        let start = SharedDomain.LocalDate(year: 2026, monthNumber: 2, dayOfMonth: 15)
+        XCTAssertEqual(SharedDomain.MembershipPlan.oneMonth.calculateEndDate(startDate: start), SharedDomain.LocalDate(year: 2026, monthNumber: 3, dayOfMonth: 15))
+        XCTAssertEqual(SharedDomain.MembershipPlan.threeMonths.calculateEndDate(startDate: start), SharedDomain.LocalDate(year: 2026, monthNumber: 5, dayOfMonth: 15))
+        XCTAssertEqual(SharedDomain.MembershipPlan.sixMonths.calculateEndDate(startDate: start), SharedDomain.LocalDate(year: 2026, monthNumber: 8, dayOfMonth: 15))
+        XCTAssertEqual(SharedDomain.MembershipPlan.twelveMonths.calculateEndDate(startDate: start), SharedDomain.LocalDate(year: 2027, monthNumber: 2, dayOfMonth: 15))
+
+        let tempDir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: tempDir) }
+
+        let repo = GymRepository(
+            fileURL: tempDir.appendingPathComponent("test_plans.json"),
+            photosDirectory: tempDir.appendingPathComponent("photos")
+        )
+
+        let calendar = Calendar.current
+        let startDate = calendar.date(from: DateComponents(year: 2026, month: 2, day: 15))!
+        let sixMonthMember = try repo.registerMember(name: "Plan Member", plan: .sixMonths, today: startDate, photo: nil)
+        let expectedEndDate = calendar.date(from: DateComponents(year: 2026, month: 8, day: 15))!
+        XCTAssertEqual(calendar.startOfDay(for: sixMonthMember.endsOnInclusive), calendar.startOfDay(for: expectedEndDate))
+    }
 }

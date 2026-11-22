@@ -76,6 +76,7 @@ fun GymApp(viewModel: GymViewModel) {
             RegisterMemberScreen(
                 uiState = uiState,
                 onNameChange = viewModel::onRegistrationNameChange,
+                onPlanSelect = viewModel::onPlanSelected,
                 onRegisterClick = { onSuccess ->
                     viewModel.registerMember { member ->
                         onSuccess(member)

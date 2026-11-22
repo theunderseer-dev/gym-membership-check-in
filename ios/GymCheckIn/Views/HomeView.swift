@@ -48,7 +48,7 @@ struct HomeView: View {
                                     .foregroundStyle(.primary)
                                     .frame(maxWidth: .infinity, alignment: .leading)
 
-                                Text("Add a new client with a 1-month pass")
+                                Text("Add a new client and choose a membership plan")
                                     .font(.subheadline)
                                     .foregroundStyle(.secondary)
                                     .multilineTextAlignment(.leading)

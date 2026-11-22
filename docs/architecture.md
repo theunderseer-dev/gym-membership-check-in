@@ -19,10 +19,11 @@ Gym Membership Check-In is a **single-device, offline** prototype with a **Kotli
 │          Shared Domain Layer (Kotlin Multiplatform)      │
 │   :shared (commonMain)                                   │
 │   • Member (domain model & status logic)                 │
+│   • MembershipPlan (1, 3, 6, 12 months tariff plans)     │
 │   • MembershipStatus (ACTIVE, EXPIRED)                   │
 │   • MemberValidation (client name rules)                 │
 │   • GymRepository (shared repository interface)          │
-│   • Date & UUID arithmetic (kotlinx-datetime)            │
+│   • Date & short ID utilities (kotlinx-datetime, Base32) │
 │   Single source of truth (ADR-004)                       │
 └─────────────┬──────────────────────────────┬─────────────┘
               │ implemented by               │ implemented by
@@ -42,13 +43,13 @@ Member
   id              String   — 6-char Crockford Base32 key (XXX-XXX, e.g. "K7X-9M2"), primary key, encoded in QR
   name            String   — client's display name
   startsOn        LocalDate— calendar date of registration (kotlinx-datetime)
-  endsOnInclusive LocalDate— startsOn + 1 calendar month
+  endsOnInclusive LocalDate— startsOn + selected MembershipPlan months (1, 3, 6, or 12)
   photoFileName   String?  — local photo filename (<id>.jpg) for identity verification
 ```
 
 **Shared Domain Single Source of Truth**:
 - **Member ID Generation & Normalization**: `MemberIdGenerator` generates 6-character Crockford Base32 keys (`XXX-XXX`) with 1+ billion unique combinations (see [ADR-005](adr/005-short-member-id-format.md)). Normalizer handles case-insensitivity, spaces, dashes, and Crockford error tolerances (`O`->`0`, `I`/`L`->`1`).
-- **Expiry calculation**: `currentDatePlusMonths(startsOn, 1)` implemented once in `commonMain` using `kotlinx-datetime`. Edge case: 31 Jan → 28/29 Feb (last day of the month), uniformly calculated on all platforms.
+- **Membership Plans & Expiry calculation**: `MembershipPlan` (`ONE_MONTH`, `THREE_MONTHS`, `SIX_MONTHS`, `TWELVE_MONTHS`) computes `endsOnInclusive` via `currentDatePlusMonths(startsOn, plan.months)` once in `commonMain` using `kotlinx-datetime`. Edge case: 31 Jan + 1 month → 28/29 Feb (last day of the month), uniformly calculated on all platforms. The registration screen displays a live expiration date preview as staff select a plan.
 - **Active status rule**: `today <= endsOnInclusive` (day granularity, inclusive boundary).
 - **Validation**: `MemberValidation.validateName(name)` enforces non-empty names and trims whitespace.
 
@@ -89,6 +90,7 @@ Home screen
     ├─► Register member
     │       │
     │       ├─ Enter name
+    │       ├─ Select Membership Plan (1, 3, 6, or 12 months) + live expiration preview
     │       ├─ Tap "Take Photo & Register" ──► Camera opens (AVFoundation)
     │       │                                      │
     │       │                                      ▼
@@ -100,7 +102,7 @@ Home screen
     │       ▼ (or "Register without Photo")                ▼
     │   Registration success ◄─────────────────────────────┘
     │       • Unique ID generated via SharedDomain (XXX-XXX)
-    │       • endsOnInclusive = today + 1 month (SharedDomain)
+    │       • endsOnInclusive = today + selected plan months (SharedDomain)
     │       • Photo saved to local photos directory (<id>.jpg)
     │       • Member record saved to local storage
     │       • QR rendered from member ID + Photo preview

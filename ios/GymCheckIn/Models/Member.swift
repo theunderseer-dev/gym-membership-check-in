@@ -46,6 +46,7 @@ struct Member: Identifiable, Codable, Equatable, Hashable {
         id: String = MemberIdGeneratorKt.generateMemberId(),
         name: String,
         startsOn: Date = Date(),
+        plan: SharedDomain.MembershipPlan = .oneMonth,
         endsOnInclusive: Date? = nil,
         createdAt: Date = Date(),
         photoFileName: String? = nil
@@ -57,7 +58,7 @@ struct Member: Identifiable, Codable, Equatable, Hashable {
             self.endsOnInclusive = endsOn
         } else {
             let startsOnShared = startsOn.toSharedLocalDate()
-            let endsOnShared = DateUtilsKt.currentDatePlusMonths(date: startsOnShared, months: 1)
+            let endsOnShared = plan.calculateEndDate(startDate: startsOnShared)
             self.endsOnInclusive = endsOnShared.toDate()
         }
         self.createdAt = createdAt
