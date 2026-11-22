@@ -1,8 +1,37 @@
 import Foundation
+import SharedDomain
 
 enum MembershipStatus: String, Codable, Hashable {
     case active = "Active"
     case expired = "Expired"
+
+    init(fromShared status: SharedDomain.MembershipStatus) {
+        switch status {
+        case .active:
+            self = .active
+        case .expired:
+            self = .expired
+        default:
+            self = .expired
+        }
+    }
+}
+
+extension Date {
+    func toSharedLocalDate() -> SharedDomain.LocalDate {
+        let calendar = Calendar.current
+        let year = Int32(calendar.component(.year, from: self))
+        let month = Int32(calendar.component(.month, from: self))
+        let day = Int32(calendar.component(.day, from: self))
+        return SharedDomain.LocalDate(year: year, monthNumber: month, dayOfMonth: day)
+    }
+}
+
+extension SharedDomain.LocalDate {
+    func toDate() -> Date {
+        let components = self.toNSDateComponents()
+        return Calendar.current.date(from: components) ?? Date()
+    }
 }
 
 struct Member: Identifiable, Codable, Equatable, Hashable {
@@ -14,7 +43,7 @@ struct Member: Identifiable, Codable, Equatable, Hashable {
     var photoFileName: String?
 
     init(
-        id: String = UUID().uuidString,
+        id: String = PlatformUtilsKt.generateUuid(),
         name: String,
         startsOn: Date = Date(),
         endsOnInclusive: Date? = nil,
@@ -27,23 +56,27 @@ struct Member: Identifiable, Codable, Equatable, Hashable {
         if let endsOn = endsOnInclusive {
             self.endsOnInclusive = endsOn
         } else {
-            let calendar = Calendar.current
-            self.endsOnInclusive = calendar.date(byAdding: .month, value: 1, to: startsOn) ?? startsOn
+            let startsOnShared = startsOn.toSharedLocalDate()
+            let endsOnShared = DateUtilsKt.currentDatePlusMonths(date: startsOnShared, months: 1)
+            self.endsOnInclusive = endsOnShared.toDate()
         }
         self.createdAt = createdAt
         self.photoFileName = photoFileName
     }
 
-    func status(asOf date: Date = Date()) -> MembershipStatus {
-        let calendar = Calendar.current
-        let startOfDayToday = calendar.startOfDay(for: date)
-        let startOfDayEndsOn = calendar.startOfDay(for: endsOnInclusive)
+    func toSharedMember() -> SharedDomain.Member {
+        SharedDomain.Member(
+            id: id,
+            name: name,
+            startsOn: startsOn.toSharedLocalDate(),
+            endsOnInclusive: endsOnInclusive.toSharedLocalDate(),
+            photoFileName: photoFileName
+        )
+    }
 
-        // Active through endsOnInclusive inclusive
-        if startOfDayToday <= startOfDayEndsOn {
-            return .active
-        } else {
-            return .expired
-        }
+    func status(asOf date: Date = Date()) -> MembershipStatus {
+        let sharedMember = toSharedMember()
+        let sharedStatus = sharedMember.status(today: date.toSharedLocalDate())
+        return MembershipStatus(fromShared: sharedStatus)
     }
 }

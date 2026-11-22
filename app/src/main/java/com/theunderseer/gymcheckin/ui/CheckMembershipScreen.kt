@@ -64,7 +64,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
-import com.theunderseer.gymcheckin.model.MembershipStatus
+import com.theunderseer.gymcheckin.domain.model.MembershipStatus
 import com.theunderseer.gymcheckin.qr.ImageDecodeResult
 import com.theunderseer.gymcheckin.qr.QrCodeUtils
 

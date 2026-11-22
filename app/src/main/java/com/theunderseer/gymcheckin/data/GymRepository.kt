@@ -1,25 +1,23 @@
 package com.theunderseer.gymcheckin.data
 
-import com.theunderseer.gymcheckin.model.Member
-import java.time.LocalDate
-import java.util.UUID
-
-interface GymRepository {
-    suspend fun registerMember(name: String, today: LocalDate = LocalDate.now()): Member
-    suspend fun getMemberById(id: String): Member?
-}
+import com.theunderseer.gymcheckin.domain.model.Member
+import com.theunderseer.gymcheckin.domain.model.MemberValidation
+import com.theunderseer.gymcheckin.domain.repository.GymRepository
+import com.theunderseer.gymcheckin.domain.util.currentDate
+import com.theunderseer.gymcheckin.domain.util.currentDatePlusMonths
+import com.theunderseer.gymcheckin.domain.util.generateUuid
+import kotlinx.datetime.LocalDate
 
 class DefaultGymRepository(
     private val memberDao: MemberDao
 ) : GymRepository {
 
     override suspend fun registerMember(name: String, today: LocalDate): Member {
-        val trimmedName = name.trim()
-        require(trimmedName.isNotEmpty()) { "Client name cannot be empty" }
+        val trimmedName = MemberValidation.validateName(name)
 
         val startsOn = today
-        val endsOnInclusive = startsOn.plusMonths(1)
-        val id = UUID.randomUUID().toString()
+        val endsOnInclusive = currentDatePlusMonths(startsOn, 1)
+        val id = generateUuid()
 
         val entity = MemberEntity(
             id = id,
