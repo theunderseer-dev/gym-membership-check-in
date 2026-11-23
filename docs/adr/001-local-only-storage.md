@@ -1,7 +1,7 @@
 # ADR-001 — Local-only storage
 
-**Date:** 2026-11  
-**Status:** Accepted
+**Date:** 2026-11
+**Status:** Accepted (offline-first local persistence retained; "no cloud sync" superseded by planned sync roadmap in [ADR-006](006-target-architecture-standards.md))
 
 ---
 
